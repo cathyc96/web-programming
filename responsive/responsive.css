@@ -1,0 +1,28 @@
+/* A stylesheet renders different versions of an image according to
+ * the width of the browser screen.
+*/
+
+.homer {width:312.5px; height:312.5px;
+  background:url(homer.png) 0 0px;}
+
+
+@media screen and (min-width: 1200px) {
+      body {
+          background-image:url(div.homer);
+      }
+  }
+
+.homer2 {width:312.5px; height:312.5px;
+    background:url(homer.png) -312.5 0px;}
+
+@media screen and (min-width: 1200px) {
+        body {
+          background-image:url(div.homer);
+          }
+      }
+
+.homer3 {width:312.5px; height:312.5px;
+    background:url(homer.png) 0 -312.5px;}
+
+.homer4 {width:312.5px; height:312.5px;
+    background:url(homer.png) -312.5 -312.5px;}

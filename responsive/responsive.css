@@ -15,7 +15,8 @@
 .homer2 {width:312.5px; height:312.5px;
     background:url(homer.png) -312.5 0px;}
 
-@media screen and (min-width: 1200px) {
+@media screen and (min-width: 800px)
+              and (max-width: 1200px) {
         body {
           background-image:url(div.homer);
           }
@@ -24,5 +25,17 @@
 .homer3 {width:312.5px; height:312.5px;
     background:url(homer.png) 0 -312.5px;}
 
+@media screen and (min-width: 400px max-width: 800px) {
+        body {
+            background-image:url(div.homer);
+            }
+        }
+
 .homer4 {width:312.5px; height:312.5px;
     background:url(homer.png) -312.5 -312.5px;}
+
+@media screen and (max-width: 400px) {
+        body {
+            background-image:url(div.homer);
+            }
+        }

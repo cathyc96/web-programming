@@ -2,40 +2,35 @@
  * the width of the browser screen.
 */
 
-.homer {width:312.5px; height:312.5px;
-  background:url(homer.png) 0 0px;}
+.homer {
+  width:312.5px;
+  height:312.5px;
+  background:url(homer.jpg) 0 0px;
+}
 
-
-@media screen and (min-width: 1200px) {
-      body {
-          background-image:url(div.homer);
-      }
+@media only screen and (min-width: 1200px) {
+  .homer {
+    background:url(homer.jpg) 0 0px;
   }
+}
 
-.homer2 {width:312.5px; height:312.5px;
-    background:url(homer.png) -312.5 0px;}
-
-@media screen and (min-width: 800px)
+@media only screen and (min-width: 800px)
               and (max-width: 1200px) {
-        body {
-          background-image:url(div.homer);
-          }
+      .homer {
+        background:url(homer.jpg) -312.5px 0;
       }
+}
 
-.homer3 {width:312.5px; height:312.5px;
-    background:url(homer.png) 0 -312.5px;}
+@media only screen and (min-width: 400px)
+              and (max-width: 800px) {
+      .homer {
+        background:url(homer.jpg) 0 -312.5px;
+      }
+}
 
-@media screen and (min-width: 400px max-width: 800px) {
-        body {
-            background-image:url(div.homer);
-            }
-        }
-
-.homer4 {width:312.5px; height:312.5px;
-    background:url(homer.png) -312.5 -312.5px;}
-
-@media screen and (max-width: 400px) {
-        body {
-            background-image:url(div.homer);
-            }
-        }
+@media only screen
+              and (max-width: 400px) {
+      .homer {
+        background:url(homer.jpg) -312.5px -312.5px;
+      }
+}

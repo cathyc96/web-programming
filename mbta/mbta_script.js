@@ -8,7 +8,8 @@ var myOptions = {
       mapTypeId: google.maps.MapTypeId.ROADMAP
     };
 var map;
-var marker;
+var myPos_marker;
+var T_icon = 'T.jpg'
 var infowindow = new google.maps.InfoWindow();
 
 function init()
@@ -36,17 +37,348 @@ function renderMap()
 
   // Update map and go there...
   map.panTo(me);
+  stations = addMarkers();
+  addPolyline(stations);
+  var closest_station = closestTstop(stations);
+  //addPolyline2(closestTstop);
 
-  // Create a marker
-  marker = new google.maps.Marker({
+  // Open info window on click of the myPos_marker
+  google.maps.event.addListener(myPos_marker, 'click', function() {
+    infowindow.setContent(
+      "<p>The closest MBTA red line station to you is: "+closest_station.title+ "</p>"+
+      "<p>It is "+shortest_distance(closest_station.position, me)+" miles away from you </p>"
+    );
+    infowindow.open(map, myPos_marker);
+  });
+
+  // Open info window on click of MBTA Red Line Station markers
+  for (i = 0; i < stations.length; i++) {
+    stations[i].index = i; //add index property
+    google.maps.event.addListener(stations[i], 'click', function() {
+      var infoWindow = new google.maps.InfoWindow();
+      var content = stations[this.index].title;
+      var index = this.index;
+      request = new XMLHttpRequest();
+      request.open("get", "https://rocky-taiga-26352.herokuapp.com/redline.json", true);
+      request.onreadystatechange = function() {
+        if (request.status == 200 && request.readyState ==4) {
+          console.log("requesting");
+          // parse JSON, loop through each through station....
+          data = request.responseText;
+          trips = JSON.parse(data);
+          var scheduale = "Next trains arriving in: ";
+          //loop through all the current trips
+          console.log("before for loop");
+          console.log(trips);
+          for (i = 0; i < trips["TripList"]["Trips"].length; i++){
+            //identify trips that are headed for this stop
+            console.log("in  1st for loop");
+            for (j = 0; j < trips["TripList"]["Trips"][i]["Predictions"].length; j++) {
+                console.log("in 2nd for loop");
+                if ( trips["TripList"]["Trips"][i]["Predictions"][j]["Stop"] == content) {
+                //record predicted train arrival times
+                scheduale += "<p>" + trips["TripList"]["Trips"][i]["Predictions"][j]["Seconds"] + " seconds"+"</p>"
+                }
+
+            }
+          }
+          infoWindow.setContent("<p>Station: " + content + "</p><p>" + scheduale +"</p>");
+          infoWindow.open(map, stations[index]);
+       } else {
+         infoWindow.setContent("<p>Station: " + content + "</p><p>" + "Sorry, I couldn't find the scheduale of upcoming trains for this station." +
+         "</p><p>" + "Please close this infowindow and try again." +"</p>");
+         infoWindow.open(map, stations[index]);
+       }
+
+    }
+    request.send();
+
+   });
+
+  }
+
+}
+
+function addMarkers()
+{
+  myPos_marker= new google.maps.Marker({
     position: me,
-    title: "Here I Am!"
   });
-  marker.setMap(map);
+  myPos_marker.setMap(map);
 
-  // Open info window on click of marker
-  google.maps.event.addListener(marker, 'click', function() {
-    infowindow.setContent(marker.title);
-    infowindow.open(map, marker);
-  });
+  //make a googlemaps Marker for each red line staiton
+  var stations = [
+
+   alewife_marker = new google.maps.Marker({
+      position: new google.maps.LatLng(42.395428,-71.142483),
+      title: "Alewife",
+      icon: T_icon,
+   }),
+
+    davis_marker = new google.maps.Marker({
+      position: new google.maps.LatLng(42.39674, -71.121815),
+      title: "Davis",
+      icon: T_icon,
+    }),
+
+    porterSq_marker = new google.maps.Marker({
+      position: new google.maps.LatLng(42.3884, -71.11914899999999),
+      title: "Porter Square",
+      icon: T_icon,
+    }),
+
+    harvardSq_marker = new google.maps.Marker({
+      position: new google.maps.LatLng(42.373362, -71.118956),
+      title: "Harvard Square",
+      icon: T_icon,
+    }),
+
+    centralSq_marker = new google.maps.Marker({
+      position: new google.maps.LatLng(42.365486, -71.103802),
+      title: "Central Square",
+      icon: T_icon,
+    }),
+
+    kendall_marker = new google.maps.Marker({
+      position: new google.maps.LatLng(42.36249079, -71.08617653),
+      title: "Kendall/MIT",
+      icon: T_icon,
+    }),
+
+    charlesMGH_marker = new google.maps.Marker({
+      position: new google.maps.LatLng(42.361166, -71.070628),
+      title: "Charles/MGH",
+      icon: T_icon,
+    }),
+
+    parkSt_marker = new google.maps.Marker({
+      position: new google.maps.LatLng(42.35639457, -71.0624242),
+      title: "Park Street",
+      icon: T_icon,
+    }),
+
+    downtownCr_marker = new google.maps.Marker({
+      position: new google.maps.LatLng(42.355518,-71.060225),
+      title: "Downtown Crossing",
+      icon: T_icon,
+    }),
+
+    southStation_marker = new google.maps.Marker({
+      position: new google.maps.LatLng(42.352271, -71.05524200000001),
+      title: "South Station",
+      icon: T_icon,
+    }),
+
+    broadway_marker = new google.maps.Marker({
+      position: new google.maps.LatLng(42.342622, -71.056967),
+      title: "Broadway",
+      icon: T_icon,
+    }),
+
+    andrew_marker = new google.maps.Marker({
+      position: new google.maps.LatLng(42.330154, -71.057655),
+      title: "Andrew",
+      icon: T_icon,
+    }),
+
+    jfk_marker = new google.maps.Marker({
+      position: new google.maps.LatLng(42.320685, -71.052391),
+      title: "JFK/UMass",
+      icon: T_icon,
+    }),
+
+    northQuincy_marker = new google.maps.Marker({
+      position: new google.maps.LatLng(42.275275, -71.029583),
+      title: "North Quincy",
+      icon: T_icon,
+    }),
+
+    wollaston_marker = new google.maps.Marker({
+      position: new google.maps.LatLng(42.2665139, -71.0203369),
+      title: "Wollaston",
+      icon: T_icon,
+    }),
+
+    quincyCtr_marker = new google.maps.Marker({
+      position: new google.maps.LatLng(42.251809, -71.005409),
+      title: "Quincy Center",
+      icon: T_icon,
+    }),
+
+    quincyAdams_marker = new google.maps.Marker({
+      position: new google.maps.LatLng(42.233391, -71.007153),
+      title: "Quincy Adams",
+      icon: T_icon,
+    }),
+
+    braintree_marker = new google.maps.Marker({
+      position: new google.maps.LatLng(42.2078543, -71.0011385),
+      title: "Braintree",
+      icon: T_icon,
+    }),
+
+    savinHill_marker = new google.maps.Marker({
+      position: new google.maps.LatLng(42.31129, -71.053331),
+      title: "Savin Hill",
+      icon: T_icon,
+    }),
+
+    fieldsCo_marker = new google.maps.Marker({
+      position: new google.maps.LatLng(42.300093, -71.061667),
+      title: "Fields Corner",
+      icon: T_icon,
+    }),
+
+    shawmut_marker = new google.maps.Marker({
+      position: new google.maps.LatLng(42.29312583,-71.06573796000001),
+      title: "Shawmut",
+      icon: T_icon,
+    }),
+
+    ashmont_marker = new google.maps.Marker({
+      position: new google.maps.LatLng(42.284652, -71.06448899999999),
+      title: "Ashmont",
+      icon: T_icon,
+    })];
+
+  //put the markers on the map
+  for (i = 0; i < stations.length; i++) {
+    stations[i].setMap(map);
+  }
+  return stations;
+
+}
+
+function addPolyline(stations)
+{
+  var coordinates1 = [];
+  var coordinates2= [];
+
+  for (i = 0; i < 18; i++ ){
+    coordinates1[i] = stations[i].position;
+  }
+
+  //the red line forks at JFK station
+  coordinates2[0] = stations[12].position;
+
+  for ( i = 1; i < 5; i ++) {
+    //the next 5 stations in the list of stations goes to the next path
+    coordinates2[i] = stations[i+17].position;
+  }
+
+  var path1 = new google.maps.Polyline({
+    path: coordinates1,
+    geodesic: true,
+    strokeColor: '#FF0000',
+    strokeOpacity: 1.0,
+    strokeWeight: 2
+  })
+  path1.setMap(map);
+
+  var path2 = new google.maps.Polyline({
+    path: coordinates2,
+    geodesic: true,
+    strokeColor: '#FF0000',
+    strokeOpacity: 1.0,
+    strokeWeight: 2
+  })
+  path2.setMap(map);
+}
+/*
+function addPolyline2(closestTstop){
+
+  var coordinates = [closestTstop.position, me]
+  var path = new google.maps.Polyline({
+    path: coordinates,
+    geodesic: true,
+    strokeColor: '#FF0000',
+    strokeOpacity: 1.0,
+    strokeWeight: 2
+  })
+  path1.setMap(map);
+
+}
+*/
+//adapted from a post on stackOverflow
+toRad = function(num) {
+//  console.log("turing this number into a radical: ");
+//  console.log(num);
+   return num * Math.PI / 180;
+
+}
+//uses haversine formula, inplemenation from stackOverflow
+function shortest_distance(LatLng1, LatLng2) {
+
+
+  var lat2 = LatLng2.lat();
+  var lon2 = LatLng2.lng();
+  var lat1 = LatLng1.lat();
+  var lon1 = LatLng1.lng();
+
+
+
+  var R = 6371; // radius of the eath in km
+  //has a problem with the .toRad() method below.?
+  var x1 = lat2-lat1;
+  var dLat = toRad(x1);
+  var x2 = lon2-lon1;
+  var dLon = toRad(x2);
+  var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                  Math.sin(dLon/2) * Math.sin(dLon/2);
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  var distance = (R * c)*0.62137119; //km to mi
+  return distance;
+
+}
+function closestTstop(stations) {
+
+  var closest;
+  var shortest_dis = 1000000;
+
+  for (i = 0; i < stations.length; i++) {
+
+    var distance = shortest_distance(stations[i].position, me);
+    if (distance < shortest_dis) {
+      shortest_dis = distance;
+      closest = stations[i];
+    }
+  }
+  return closest;
+
+}
+
+function getScheduale(station){
+
+  console.log(station);
+  request = new XMLHttpRequest();
+  request.open("get", "https://rocky-taiga-26352.herokuapp.com/redline.json", true);
+  request.onreadystatechange = updateTimes;
+  request.send();
+
+}
+
+function updateTimes() {
+
+  console.log("The data is   " + request.responseText);
+
+  if (request.readyState == 4 && request.status == 200) {
+    data = request.responseText;
+    trips = JSON.parse(data);
+    newHTML = "";
+
+    for (i = 0; i < trips.length; i++){
+
+      //identify trips that are headed for this stop
+      for (j = 0; j < trips[i]["predictions"].length; j++) {}
+          if ( trips[i]["predictions"][j]["stop"] == station.title)
+
+          //record predicted train arrival times
+          newHTML += "<p>" + trips[i]["predictions"][j]["seconds"] + "</p>"
+    }
+    return newHTML;
+
+  } else {
+    console.log("Could not fulfill request");
+  }
 }

@@ -40,13 +40,13 @@ function renderMap()
   stations = addMarkers();
   addPolyline(stations);
   var closest_station = closestTstop(stations);
-  //addPolyline2(closestTstop);
+  Polyline_me_to(closest_station);
 
   // Open info window on click of the myPos_marker
   google.maps.event.addListener(myPos_marker, 'click', function() {
     infowindow.setContent(
-      "<p>The closest MBTA red line station to you is: "+closest_station.title+ "</p>"+
-      "<p>It is "+shortest_distance(closest_station.position, me)+" miles away from you </p>"
+      "<p>The closest MBTA red line station to you is: <b>"+closest_station.title+ "</b></p>"+
+      "<p>It is "+shortest_distance(closest_station.position, me).toFixed(2)+" miles away from you </p>"
     );
     infowindow.open(map, myPos_marker);
   });
@@ -56,36 +56,51 @@ function renderMap()
     stations[i].index = i; //add index property
     google.maps.event.addListener(stations[i], 'click', function() {
       var infoWindow = new google.maps.InfoWindow();
-      var content = stations[this.index].title;
+      var this_station = stations[this.index].title;
       var index = this.index;
+      // make a new XMLHttp Request for the real time scheduale of upcoming trains
+      // everytime the marker is clicked
       request = new XMLHttpRequest();
       request.open("get", "https://rocky-taiga-26352.herokuapp.com/redline.json", true);
       request.onreadystatechange = function() {
         if (request.status == 200 && request.readyState ==4) {
-          console.log("requesting");
-          // parse JSON, loop through each through station....
           data = request.responseText;
           trips = JSON.parse(data);
-          var scheduale = "Next trains arriving in: ";
+          var scheduale = "";
+          var braintree_scheduale = [];
+          var ashmont_scheduale = [];
+          var alewife_scheduale = [];
+          var content;
           //loop through all the current trips
-          console.log("before for loop");
-          console.log(trips);
           for (i = 0; i < trips["TripList"]["Trips"].length; i++){
             //identify trips that are headed for this stop
-            console.log("in  1st for loop");
             for (j = 0; j < trips["TripList"]["Trips"][i]["Predictions"].length; j++) {
-                console.log("in 2nd for loop");
-                if ( trips["TripList"]["Trips"][i]["Predictions"][j]["Stop"] == content) {
-                //record predicted train arrival times
-                scheduale += "<p>" + trips["TripList"]["Trips"][i]["Predictions"][j]["Seconds"] + " seconds"+"</p>"
+                if ( trips["TripList"]["Trips"][i]["Predictions"][j]["Stop"] == this_station) {
+                  //record predicted train arrival times according to destinations
+                  if ( trips["TripList"]["Trips"][i]["Destination"] == "Braintree"){
+                    braintree_scheduale[braintree_scheduale.length] = trips["TripList"]["Trips"][i]["Predictions"][j]["Seconds"];
+                  }
+                  if ( trips["TripList"]["Trips"][i]["Destination"] == "Ashmont"){
+                    ashmont_scheduale[ashmont_scheduale.length]= trips["TripList"]["Trips"][i]["Predictions"][j]["Seconds"];
+                  }
+                  if ( trips["TripList"]["Trips"][i]["Destination"] == "Alewife"){
+                    alewife_scheduale[alewife_scheduale.length] = trips["TripList"]["Trips"][i]["Predictions"][j]["Seconds"];
+                  }
                 }
-
             }
           }
-          infoWindow.setContent("<p>Station: " + content + "</p><p>" + scheduale +"</p>");
+          braintree_scheduale = make_pretty(braintree_scheduale);
+          ashmont_scheduale = make_pretty(ashmont_scheduale);
+          alewife_scheduale= make_pretty(alewife_scheduale);
+          scheduale = "<p>To <b>Ashmont </b> in: "+ashmont_scheduale+"</p>"+
+                      "<p>To <b>Braintree</b> in: "+braintree_scheduale+"</p>"+
+                      "<p>To <b>Alewife</b> in: "+alewife_scheduale+"</p>";
+          infoWindow.setContent("<p><h1>"+this_station+" Station</h1></p><p><b>Next Trains Arriving:</b></p>"+scheduale);
           infoWindow.open(map, stations[index]);
-       } else {
-         infoWindow.setContent("<p>Station: " + content + "</p><p>" + "Sorry, I couldn't find the scheduale of upcoming trains for this station." +
+      //if the request fails, request the user to re-open the window, prompting
+      //a new request
+       }else {
+         infoWindow.setContent("<p>Station: " + this_station + "</p><p>" + "Sorry, I couldn't find the scheduale of upcoming trains for this station." +
          "</p><p>" + "Please close this infowindow and try again." +"</p>");
          infoWindow.open(map, stations[index]);
        }
@@ -284,38 +299,32 @@ function addPolyline(stations)
   })
   path2.setMap(map);
 }
-/*
-function addPolyline2(closestTstop){
 
-  var coordinates = [closestTstop.position, me]
+function Polyline_me_to(closest_station){
+
+  var coordinates = [closest_station.position, me]
   var path = new google.maps.Polyline({
     path: coordinates,
     geodesic: true,
-    strokeColor: '#FF0000',
+    strokeColor: '#FFFF00',
     strokeOpacity: 1.0,
     strokeWeight: 2
   })
-  path1.setMap(map);
+  path.setMap(map);
 
 }
-*/
+
 //adapted from a post on stackOverflow
 toRad = function(num) {
-//  console.log("turing this number into a radical: ");
-//  console.log(num);
    return num * Math.PI / 180;
-
 }
 //uses haversine formula, inplemenation from stackOverflow
 function shortest_distance(LatLng1, LatLng2) {
-
 
   var lat2 = LatLng2.lat();
   var lon2 = LatLng2.lng();
   var lat1 = LatLng1.lat();
   var lon1 = LatLng1.lng();
-
-
 
   var R = 6371; // radius of the eath in km
   //has a problem with the .toRad() method below.?
@@ -348,37 +357,20 @@ function closestTstop(stations) {
 
 }
 
-function getScheduale(station){
+function make_pretty(scheduale) {
 
-  console.log(station);
-  request = new XMLHttpRequest();
-  request.open("get", "https://rocky-taiga-26352.herokuapp.com/redline.json", true);
-  request.onreadystatechange = updateTimes;
-  request.send();
-
-}
-
-function updateTimes() {
-
-  console.log("The data is   " + request.responseText);
-
-  if (request.readyState == 4 && request.status == 200) {
-    data = request.responseText;
-    trips = JSON.parse(data);
-    newHTML = "";
-
-    for (i = 0; i < trips.length; i++){
-
-      //identify trips that are headed for this stop
-      for (j = 0; j < trips[i]["predictions"].length; j++) {}
-          if ( trips[i]["predictions"][j]["stop"] == station.title)
-
-          //record predicted train arrival times
-          newHTML += "<p>" + trips[i]["predictions"][j]["seconds"] + "</p>"
+  scheduale.sort(function(a, b){return a-b});
+  for ( count = 0; count < scheduale.length; count++) {
+    var time = scheduale[count];
+    var minutes = Math.floor(time/ 60);
+    var seconds = time - minutes * 60;
+    if ( minutes >= 1){
+      scheduale[count]  = " "+minutes+" mins "+seconds+" seconds";
+    } else {
+      scheduale[count]  = " "+time+" seconds";
     }
-    return newHTML;
-
-  } else {
-    console.log("Could not fulfill request");
   }
+  scheduale = scheduale.join();
+  return scheduale;
+
 }

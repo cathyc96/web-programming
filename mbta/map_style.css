@@ -3,6 +3,12 @@ html {
 	font-family: Helvetica, "Helvetica Neue", Arial, sans-serif;
 }
 
+h1 {
+	font-family: Helvetica, "Helvetica Neue", Arial, sans-serif;
+	font-size: 12pt;
+	font-weight: bold;
+}
+
 body {
 	height: 100%;
 	margin: 0px;

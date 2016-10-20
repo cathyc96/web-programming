@@ -1,8 +1,6 @@
-README for Tufts Comp 20 Assignment 2
-
-Catherine Cowell
-
-October 20, 2019
+README for Tufts Comp 20 Assignment 2  
+Catherine Cowell  
+October 20, 2019  
 
 1) I think that most of the aspects of this project have been implemented
  correctly. Since I make a new XML HTTP request each time the user clicks

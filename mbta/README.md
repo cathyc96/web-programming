@@ -10,8 +10,10 @@ October 20, 2019
  the user clicks on a marker. However, with this method I had to put all the
  AJAX stuff and parse the data in my function to render the markers, which makes
  the function very convoluted.
+
 2) I received help in office hours with TA David Bernstein and with Ming. I also
  used a modified version of the haversineDistance function found on
  http://stackoverflow.com/questions/14560999/using-the-haversine-formula-in-javascript
  to implement the Haversine formula.
+ 
 3) I spend approximately 20 hours working on this assignment.

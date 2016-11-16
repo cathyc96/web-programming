@@ -186,10 +186,7 @@ GameManager.prototype.move = function (direction) {
       this.over = true; // Game over!
       //cathy's edits begin
       var g = JSON.stringify(this.grid);
-      console.log(g);
-      console.log(this.score);
       var username = prompt("Please enter a username");
-      console.log(username);
       $.post("https://thawing-bastion-78418.herokuapp.com/submit.json",{username:username,score:this.score,grid:g});
       //cathy edits end
     }

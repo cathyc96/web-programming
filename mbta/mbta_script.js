@@ -61,7 +61,7 @@ function renderMap()
       // make a new XMLHttp Request for the real time scheduale of upcoming trains
       // everytime the marker is clicked
       request = new XMLHttpRequest();
-      request.open("get", "https://rocky-taiga-26352.herokuapp.com/redline.json", true);
+      request.open("get", "https://thawing-bastion-78418.herokuapp.com/redline.json", true);
       request.onreadystatechange = function() {
         if (request.status == 200 && request.readyState ==4) {
           data = request.responseText;
